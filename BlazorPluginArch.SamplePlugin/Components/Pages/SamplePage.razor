@@ -1,0 +1,42 @@
+@page "/sample"
+@attribute [PluginComponent(DisplayName = "Sample Page", Order = 10)]
+@inject ISampleService SampleService
+@rendermode InteractiveServer
+
+<h1>Sample Plugin Page</h1>
+
+<p>This page is provided by the Sample Plugin.</p>
+
+<div class="card mb-3">
+    <div class="card-header">
+        Greeting Demo
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">Enter your name:</label>
+            <input type="text" class="form-control" @bind="_name" @bind:event="oninput" />
+        </div>
+        <p class="lead">@SampleService.GetGreeting(_name)</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Counter Demo
+    </div>
+    <div class="card-body">
+        <p>Current count: <strong>@SampleService.GetCounter()</strong></p>
+        <button class="btn btn-primary" @onclick="IncrementCounter">
+            Click me
+        </button>
+    </div>
+</div>
+
+@code {
+    private string _name = "World";
+
+    private void IncrementCounter()
+    {
+        SampleService.IncrementCounter();
+    }
+}

@@ -1,0 +1,67 @@
+@page "/sample/about"
+@attribute [PluginComponent(DisplayName = "About Plugin", Order = 20)]
+@inject IPluginRegistry PluginRegistry
+@rendermode InteractiveServer
+
+<h1>About Sample Plugin</h1>
+
+<p>This page displays information about the registered plugins.</p>
+
+<h2>Registered Plugins</h2>
+
+@foreach (var plugin in PluginRegistry.Plugins)
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            <strong>@plugin.Name</strong> (v@(plugin.Version))
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">@plugin.Id</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@(plugin.Description ?? "No description")</dd>
+
+                <dt class="col-sm-3">Assembly</dt>
+                <dd class="col-sm-9">@plugin.Assembly.GetName().Name</dd>
+
+                <dt class="col-sm-3">Components</dt>
+                <dd class="col-sm-9">@plugin.Components.Count component(s)</dd>
+
+                <dt class="col-sm-3">Service Registrar</dt>
+                <dd class="col-sm-9">@(plugin.ServiceRegistrar is not null ? "Yes" : "No")</dd>
+            </dl>
+
+            @if (plugin.Components.Count > 0)
+            {
+                <h5>Components:</h5>
+                <ul>
+                    @foreach (var component in plugin.Components)
+                    {
+                        <li>
+                            <strong>@component.DisplayName</strong>
+                            @if (!string.IsNullOrEmpty(component.Route))
+                            {
+                                <text> - </text>
+                                <a href="@component.Route">@component.Route</a>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+}
+
+<h2>Navigation Components</h2>
+<p>These components are configured to appear in navigation menus:</p>
+
+<ul>
+    @foreach (var nav in PluginRegistry.NavigationComponents)
+    {
+        <li>
+            <a href="@nav.Route">@nav.DisplayName</a> (Order: @nav.Order)
+        </li>
+    }
+</ul>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BlazorPluginArch.Abstractions/BlazorPluginArch.Abstractions.csproj" />
+  <Project Path="BlazorPluginArch.SamplePlugin/BlazorPluginArch.SamplePlugin.csproj" />
+  <Project Path="BlazorPluginArch.SourceGenerators/BlazorPluginArch.SourceGenerators.csproj" />
+  <Project Path="BlazorPluginArch/BlazorPluginArch.csproj" />
+</Solution>

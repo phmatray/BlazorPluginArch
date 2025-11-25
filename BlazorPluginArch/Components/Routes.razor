@@ -1,0 +1,11 @@
+﻿@using BlazorPluginArch.Abstractions
+@inject IPluginRegistry PluginRegistry
+
+<Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="PluginRegistry.PluginAssemblies"
+        NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+    </Found>
+</Router>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\BlazorPluginArch.Abstractions\BlazorPluginArch.Abstractions.csproj" />
+        <ProjectReference Include="..\BlazorPluginArch.SourceGenerators\BlazorPluginArch.SourceGenerators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+        <!-- Plugin references - source generator discovers plugins from these -->
+        <ProjectReference Include="..\BlazorPluginArch.SamplePlugin\BlazorPluginArch.SamplePlugin.csproj" />
+    </ItemGroup>
+
+</Project>
