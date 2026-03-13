@@ -239,19 +239,48 @@ builder.Services.AddPlugins(
 );
 
 var app = builder.Build();
-// ... rest of configuration
+
+// Required: re-execute on 404 so the Blazor Router can resolve plugin routes
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
+app.UseHttpsRedirection();
+app.UseAntiforgery();
+
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
+app.Run();
+```
+
+### NotFound Page (Required)
+
+You **must** create a `NotFound.razor` page and configure the Router to use it. Without this, navigating directly to plugin routes (e.g. via URL or page refresh) will return a raw 404 instead of letting the Blazor Router resolve routes from plugin assemblies.
+
+**`Components/Pages/NotFound.razor`**:
+
+```razor
+@page "/not-found"
+@layout MainLayout
+
+<h3>Not Found</h3>
+<p>Sorry, the content you are looking for does not exist.</p>
 ```
 
 ### Routes.razor
+
+The `NotFoundPage` parameter on the `Router` component is **required** for plugin routes to work correctly:
 
 ```razor
 @using BlazorPluginArch.Abstractions
 @inject IPluginRegistry PluginRegistry
 
 <Router AppAssembly="typeof(Program).Assembly"
-        AdditionalAssemblies="PluginRegistry.PluginAssemblies">
+        AdditionalAssemblies="PluginRegistry.PluginAssemblies"
+        NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
     </Found>
 </Router>
 ```
