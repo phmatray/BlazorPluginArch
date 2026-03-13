@@ -1,6 +1,8 @@
 @page "/sample"
 @attribute [PluginComponent(DisplayName = "Sample Page", Order = 10)]
 @inject ISampleService SampleService
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 @rendermode InteractiveServer
 
 <h1>Sample Plugin Page</h1>
@@ -20,7 +22,7 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card mb-3">
     <div class="card-header">
         Counter Demo
     </div>
@@ -32,11 +34,79 @@
     </div>
 </div>
 
+<div class="card">
+    <div class="card-header">
+        JavaScript Interop Demo
+    </div>
+    <div class="card-body">
+        <p>This section demonstrates JavaScript loaded from the plugin's own <code>wwwroot/</code> folder.</p>
+
+        <button class="btn btn-outline-primary me-2" @onclick="ShowJsAlert">
+            Show JS Alert
+        </button>
+        <button class="btn btn-outline-secondary" @onclick="GetBrowserWindowSize">
+            Get Window Size
+        </button>
+
+        @if (_windowSize is not null)
+        {
+            <p class="mt-2">
+                Window size: <strong>@_windowSize</strong>
+            </p>
+        }
+    </div>
+</div>
+
 @code {
     private string _name = "World";
+    private string? _windowSize;
+    private PluginJsModule? _jsModule;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule = await PluginJsModule.ImportAsync(JS, typeof(SamplePlugin), "js/sample-plugin.js");
+        }
+    }
 
     private void IncrementCounter()
     {
         SampleService.IncrementCounter();
+    }
+
+    private async Task ShowJsAlert()
+    {
+        if (_jsModule is not null)
+        {
+            await _jsModule.InvokeVoidAsync("showAlert", $"Hello from {SampleService.GetGreeting(_name)}");
+        }
+    }
+
+    private async Task GetBrowserWindowSize()
+    {
+        if (_jsModule is not null)
+        {
+            var size = await _jsModule.InvokeAsync<WindowSize>("getWindowSize");
+            _windowSize = $"{size.Width} x {size.Height}";
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_jsModule is not null)
+        {
+            await _jsModule.DisposeAsync();
+            _jsModule = null;
+        }
+    }
+
+    private sealed class WindowSize
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("width")]
+        public int Width { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("height")]
+        public int Height { get; set; }
     }
 }
