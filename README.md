@@ -389,6 +389,18 @@ public interface IPluginRegistry
 - User-installable plugins
 - Scenarios requiring hot-reload of plugins
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **.NET 10 · .NET Standard 2.0**
+- Microsoft.AspNetCore.Components
+- Microsoft.JSInterop
+- Microsoft.AspNetCore.Components.Web
+- Microsoft.CodeAnalysis.CSharp
+
+<!-- portfolio-techstack:end -->
+
 ## License
 
 MIT
