@@ -15,6 +15,30 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/BlazorPluginArch)](https://github.com/phmatray/BlazorPluginArch/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Features](#features)
+- [The Problem](#the-problem)
+- [The Solution](#the-solution)
+- [Architecture Overview](#architecture-overview)
+- [Project Structure](#project-structure)
+- [How It Works](#how-it-works)
+- [Creating a Plugin](#creating-a-plugin)
+- [Using Plugins in the Host](#using-plugins-in-the-host)
+- [API Reference](#api-reference)
+- [Benefits](#benefits)
+- [Limitations](#limitations)
+- [When to Use This](#when-to-use-this)
+- [Tech Stack](#tech-stack)
+- [License](#license)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+
+<!-- portfolio-toc:end -->
+
+
 
 A reflection-free plugin architecture for Blazor applications using source generators.
 
