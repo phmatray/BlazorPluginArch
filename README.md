@@ -2,6 +2,20 @@
 
 # Blazor Plugin Architecture
 
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - BlazorPluginArch](https://img.shields.io/static/v1?label=phmatray&message=BlazorPluginArch&color=blue&logo=github)](https://github.com/phmatray/BlazorPluginArch)
+![Top language](https://img.shields.io/github/languages/top/phmatray/BlazorPluginArch)
+[![Stars](https://img.shields.io/github/stars/phmatray/BlazorPluginArch?style=social)](https://github.com/phmatray/BlazorPluginArch/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/BlazorPluginArch?style=social)](https://github.com/phmatray/BlazorPluginArch/network/members)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/BlazorPluginArch)](https://github.com/phmatray/BlazorPluginArch/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/BlazorPluginArch)](https://github.com/phmatray/BlazorPluginArch/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/BlazorPluginArch)](https://github.com/phmatray/BlazorPluginArch/commits)
+<!-- portfolio-badges:end -->
+
+
 A reflection-free plugin architecture for Blazor applications using source generators.
 
 ## The Problem
