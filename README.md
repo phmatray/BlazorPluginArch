@@ -38,6 +38,27 @@
 
 <!-- portfolio-toc:end -->
 
+<!-- portfolio-getstarted:start -->
+
+## Getting Started
+
+### Prerequisites
+
+- [.NET SDK](https://dotnet.microsoft.com/download)
+
+### Run
+
+```bash
+git clone https://github.com/phmatray/BlazorPluginArch.git
+cd BlazorPluginArch
+dotnet restore
+dotnet build
+dotnet run --project BlazorPluginArch/BlazorPluginArch.csproj
+```
+
+<!-- portfolio-getstarted:end -->
+
+
 
 
 A reflection-free plugin architecture for Blazor applications using source generators.
