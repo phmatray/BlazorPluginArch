@@ -1,3 +1,5 @@
+![BlazorPluginArch banner](.github/banner.png)
+
 # Blazor Plugin Architecture
 
 A reflection-free plugin architecture for Blazor applications using source generators.
