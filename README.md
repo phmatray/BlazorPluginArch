@@ -18,6 +18,16 @@
 
 A reflection-free plugin architecture for Blazor applications using source generators.
 
+## Features
+
+- **Compile-time plugin discovery** — Roslyn source generators scan `IPlugin` implementations and `.razor` files at build time; there is no runtime assembly scanning.
+- **AOT & trimming compatible** — because discovery happens at compile time, plugins work with Native AOT and trimming, unlike reflection-based approaches.
+- **Simple plugin contract** — implement `IPlugin` (`Id`, `Name`, `Version`, `Description`, `Initialize`) and optionally `IPluginServiceRegistrar` to register DI services.
+- **Automatic route & component discovery** — `@page` directives in a plugin's `.razor` files are found automatically and exposed through `IPluginRegistry`.
+- **`[PluginComponent]` customization** — an optional attribute to control `DisplayName`, `Order`, and `ShowInNavigation` per component, with sensible PascalCase-derived defaults.
+- **Inspectable generated code** — each plugin ships a generated `PluginRegistration.GetPlugins()` class the host references directly, so removing a plugin is a compile-time error, not a silent runtime gap.
+- **Sample plugin included** — `BlazorPluginArch.SamplePlugin` demonstrates a complete, working plugin end-to-end.
+
 ## The Problem
 
 Building modular Blazor applications typically requires one of these approaches:
@@ -406,6 +416,16 @@ public interface IPluginRegistry
 MIT
 
 ---
+
+## Roadmap
+
+- [ ] Support dynamic plugin loading behind an opt-in (non-AOT) mode
+- [ ] Add versioning/compatibility checks between host and plugin contracts
+- [ ] Provide a `dotnet new` template for scaffolding new plugins
+- [ ] Add a sample for lazy-loaded Blazor WebAssembly plugin assemblies
+- [ ] Expand test coverage for the source generator's edge cases
+
+Track progress and proposals in the [open issues](https://github.com/phmatray/BlazorPluginArch/issues).
 
 <!-- portfolio-sections:start -->
 
