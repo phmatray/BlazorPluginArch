@@ -8,6 +8,7 @@
 ![Top language](https://img.shields.io/github/languages/top/phmatray/BlazorPluginArch)
 [![Stars](https://img.shields.io/github/stars/phmatray/BlazorPluginArch?style=social)](https://github.com/phmatray/BlazorPluginArch/stargazers)
 [![Forks](https://img.shields.io/github/forks/phmatray/BlazorPluginArch?style=social)](https://github.com/phmatray/BlazorPluginArch/network/members)
+[![License](https://img.shields.io/github/license/phmatray/BlazorPluginArch)](https://github.com/phmatray/BlazorPluginArch/blob/HEAD/LICENSE)
 
 <!-- Activity -->
 [![Issues](https://img.shields.io/github/issues/phmatray/BlazorPluginArch)](https://github.com/phmatray/BlazorPluginArch/issues)
