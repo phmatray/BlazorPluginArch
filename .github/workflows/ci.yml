@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: ["dev"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Locate solution
+        id: sln
+        run: |
+          SLN=$(find . \( -name '*.slnx' -o -name '*.sln' \) -not -path '*/bin/*' -not -path '*/obj/*' | head -1)
+          if [ -z "$SLN" ]; then
+            SLN=$(find . \( -name '*.csproj' -o -name '*.fsproj' \) -not -path '*/bin/*' -not -path '*/obj/*' | head -1)
+          fi
+          echo "Target: $SLN"
+          echo "path=$SLN" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: dotnet build "${{ steps.sln.outputs.path }}" -c Release
+
+      - name: Test
+        run: |
+          if grep -rlq "Microsoft.NET.Test.Sdk" --include='*.csproj' --include='*.fsproj' .; then
+            dotnet test "${{ steps.sln.outputs.path }}" -c Release --verbosity normal
+          else
+            echo "No test projects found — skipping tests."
+          fi
