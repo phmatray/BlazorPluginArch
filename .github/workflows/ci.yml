@@ -1,5 +1,32 @@
 name: CI
 
+# Gabarit pose par ci_pilot.py sur les depots .NET sans workflow.
+#
+# Trois defauts mesures le 2026-07-28 et corriges ici. Les trois produisaient le
+# meme effet : un vert qui ne disait rien du depot.
+#
+#  1. `find ... | head -1` n'etait PAS trie. La cible construite dependait de
+#     l'ordre d'enumeration du systeme de fichiers du runner — ce n'etait donc
+#     pas "la premiere solution" mais une solution arbitraire. Mesure sur
+#     G3.TreasuresMonsters : ubuntu prenait le .sln, macOS le .slnx, et le .slnx
+#     ne compile pas (CS0234). Le meme depot etait vert en CI et rouge en local.
+#     Ici on construit TOUTES les cibles, dans un ordre stable.
+#
+#  2. La garde de test cherchait `Microsoft.NET.Test.Sdk` seul. Les projets
+#     xunit.v3 / Microsoft.Testing.Platform n'en portent pas : la CI annoncait
+#     "No test projects found" sur des depots qui en ont. Mesure : 6 des 53
+#     depots equipes avaient des projets de test presents et jamais executes,
+#     en restant verts.
+#
+#  3. `TestResults/*.log` n'etait televerse nulle part. C'est la ou MTP ecrit le
+#     detail des assertions ; sans lui, tout echec de test en CI est
+#     indiagnosticable a distance.
+#
+# Ce gabarit est plus severe que le precedent : des depots qui passaient au vert
+# sans rien prouver vont echouer. C'est le but. Le flux de ci_pilot ne merge que
+# les PR vertes, donc un depot nouvellement severe reste en backlog au lieu de
+# recevoir un badge qui ment.
+
 on:
   push:
     branches: ["dev"]
@@ -9,33 +36,90 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
+          # `9.0.x` reste malgre la politique "aucune jambe net9" : elle decrit
+          # l'etat cible, pas l'etat des depots que ce gabarit equipe. Mesure du
+          # 2026-07-28 sur les 36 depots .NET encore sans workflow — 28 projets
+          # ciblent net9.0. Le retirer cassait leur CI des la pose.
           dotnet-version: |
             8.0.x
             9.0.x
             10.0.x
 
-      - name: Locate solution
-        id: sln
+      - name: Decouvrir les cibles
+        shell: bash
         run: |
-          SLN=$(find . \( -name '*.slnx' -o -name '*.sln' \) -not -path '*/bin/*' -not -path '*/obj/*' | head -1)
-          if [ -z "$SLN" ]; then
-            SLN=$(find . \( -name '*.csproj' -o -name '*.fsproj' \) -not -path '*/bin/*' -not -path '*/obj/*' | head -1)
+          set -uo pipefail
+          # `sort` n'est pas cosmetique : sans lui l'ordre vient du systeme de
+          # fichiers et differe entre runners. Voir le defaut 1 en tete.
+          #
+          # Pas de `mapfile` ici, volontairement : il n'existe pas avant bash 4,
+          # donc le poste de dev (bash 3.2) ne pourrait pas rejouer cette etape.
+          # Une logique qu'on ne peut pas tester hors CI n'a pas de test.
+          CIBLES="$RUNNER_TEMP/ci_targets.txt"
+          find . \( -name '*.slnx' -o -name '*.sln' \) \
+            -not -path '*/bin/*' -not -path '*/obj/*' -not -path '*/node_modules/*' \
+            | sort > "$CIBLES"
+          if [ ! -s "$CIBLES" ]; then
+            find . \( -name '*.csproj' -o -name '*.fsproj' \) \
+              -not -path '*/bin/*' -not -path '*/obj/*' -not -path '*/node_modules/*' \
+              | sort > "$CIBLES"
           fi
-          echo "Target: $SLN"
-          echo "path=$SLN" >> "$GITHUB_OUTPUT"
+          if [ ! -s "$CIBLES" ]; then
+            echo "::error::Aucune solution ni projet trouve."
+            exit 1
+          fi
+          echo "$(wc -l < "$CIBLES" | tr -d ' ') cible(s) :"
+          sed 's/^/  /' "$CIBLES"
 
-      - name: Build
-        run: dotnet build "${{ steps.sln.outputs.path }}" -c Release
-
-      - name: Test
+      - name: Construire chaque cible
+        shell: bash
         run: |
-          if grep -rlq "Microsoft.NET.Test.Sdk" --include='*.csproj' --include='*.fsproj' .; then
-            dotnet test "${{ steps.sln.outputs.path }}" -c Release --verbosity normal
-          else
-            echo "No test projects found — skipping tests."
+          set -uo pipefail
+          FAILED=()
+          while read -r t; do
+            echo "::group::build $t"
+            dotnet build "$t" -c Release --nologo || FAILED+=("$t")
+            echo "::endgroup::"
+          done < "$RUNNER_TEMP/ci_targets.txt"
+          if [ ${#FAILED[@]} -gt 0 ]; then
+            echo "::error::${#FAILED[@]} cible(s) en echec au build : ${FAILED[*]}"
+            exit 1
           fi
+          echo "Toutes les cibles construisent."
+
+      - name: Tester chaque cible
+        shell: bash
+        run: |
+          set -uo pipefail
+          # Un projet de test se reconnait a son framework, PAS au seul
+          # Microsoft.NET.Test.Sdk : xunit.v3 et Microsoft.Testing.Platform
+          # n'en portent pas, et la garde precedente les sautait en silence.
+          if ! grep -rlqE 'Microsoft\.NET\.Test\.Sdk|[Xx]unit|NUnit|MSTest|TUnit|Microsoft\.Testing\.Platform' \
+               --include='*.csproj' --include='*.fsproj' .; then
+            echo "Aucun projet de test — etape sautee."
+            exit 0
+          fi
+          FAILED=()
+          while read -r t; do
+            echo "::group::test $t"
+            dotnet test "$t" -c Release --verbosity normal || FAILED+=("$t")
+            echo "::endgroup::"
+          done < "$RUNNER_TEMP/ci_targets.txt"
+          if [ ${#FAILED[@]} -gt 0 ]; then
+            echo "::error::${#FAILED[@]} cible(s) en echec aux tests : ${FAILED[*]}"
+            exit 1
+          fi
+
+      - name: Publier les journaux de test
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: '**/TestResults/**'
+          if-no-files-found: ignore
+          retention-days: 14
